@@ -20,7 +20,6 @@ describe('Invalid paths', () => {
         })
     });
 });
-
 describe('GET /api/topics', () => {
     test('status 200: returns an array of topic objects, each with "slug" and "description" properties', () => {
         return request(app)
@@ -35,5 +34,19 @@ describe('GET /api/topics', () => {
                     })
                 })
             })
+    });
+});
+describe('GET /api', () => {
+    test('status 200: returns an object with all avilable API endpoints and their documentation', () => {
+        return request(app)
+        .get("/api")
+        .expect(200)
+        .then(({body}) => {
+            for(const property in body){
+                expect(body[property]).toMatchObject({
+                    description: expect.any(String)
+                })
+            }
+        })
     });
 });
