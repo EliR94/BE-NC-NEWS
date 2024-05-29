@@ -3,6 +3,7 @@ const app = require("../app.js");
 const db = require("../db/connection.js");
 const seed = require("../db/seeds/seed.js");
 const testData = require("../db/data/test-data/index.js");
+const endpointsJSON = require("../endpoints.json")
 
 beforeEach(() => seed(testData))
 afterAll(() => db.end())
@@ -40,11 +41,7 @@ describe('GET /api', () => {
         .expect(200)
         .then(({body}) => {
             const endpoints = body.endpoints
-            for(const property in endpoints){
-                expect(endpoints[property]).toMatchObject({
-                    description: expect.any(String)
-                })
-            }
+            expect(endpoints).toEqual(endpointsJSON)
         })
     });
 });
@@ -83,4 +80,28 @@ describe('GET /api/articles/:article_id', () => {
         })
     });
     // 
+});
+describe('GET /api/articles', () => {
+    test('status 200: returns an array of article objects each of which with the following properties: author, title, article_id, topic, created_at, votes, article_img_url, comment_count', () => {
+        return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({body}) => {
+            const articles = body.articles
+            expect(articles).toBeSorted({ descensing: true })
+            for(const property in articles){
+                expect(articles[property]).not.toContainKey("body")
+                expect(articles[property]).toMatchObject({
+                    author: expect.any(String),
+                    title: expect.any(String),
+                    article_id: expect.any(Number),
+                    topic: expect.any(String),
+                    created_at: expect.any(String),
+                    votes: expect.any(Number),
+                    article_img_url: expect.any(String),
+                    comment_count: expect.any(Number)
+                })
+            }
+        })
+    });
 });
