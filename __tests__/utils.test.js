@@ -2,6 +2,7 @@ const {
   convertTimestampToDate,
   createRef,
   formatComments,
+  removeBodyProperty
 } = require("../db/seeds/utils");
 
 describe("convertTimestampToDate", () => {
@@ -102,3 +103,28 @@ describe("formatComments", () => {
     expect(formattedComments[0].created_at).toEqual(new Date(timestamp));
   });
 });
+
+describe("removeBodyProperty", () => {
+  test('should not mutate the input object', () => {
+    const input = {key: "value"}
+    const expected = {key: "value"}
+    removeBodyProperty(input)
+    expect(input).toEqual(expected)
+  });
+  test('should return a new object with a different memory reference', () => {
+    const input = {key: "value"}
+    const returnValue = removeBodyProperty(input)
+    expect(input).not.toBe(returnValue)
+  });
+  test('should take an object and return an object', () => {
+    expect(removeBodyProperty({})).toEqual({})
+  });
+  test('should take an object with a property with key "body" and remove that property', () => {
+    const input = { article_id: 1, body: "info", }
+    const expected = { article_id: 1 }
+    expect(removeBodyProperty(input)).toEqual(expected)
+    const input2 = { body: "info" }
+    const expected2 = {}
+    expect(removeBodyProperty(input2)).toEqual(expected2)
+  });
+})
