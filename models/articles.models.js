@@ -1,6 +1,4 @@
 const db = require("../db/connection.js")
-const { removeBodyProperty } = require("../db/seeds/utils.js")
-const { countComments } = require("./comments.models.js")
 
 exports.fetchArticles = () => {
     return db
@@ -25,12 +23,14 @@ exports.fetchArticleById = (article_id) => {
         })
 }
 
-exports.checkArticleExists = (article_id) => {
+exports.updateArticleVotesById = (article_id, inc_votes) => {
     return db
-    .query("SELECT * FROM articles WHERE article_id = $1", [article_id])
+    .query("SELECT votes FROM articles WHERE article_id = $1", [article_id])
     .then(({rows}) => {
-        if(!rows.length){
-            return Promise.reject({status: 404, msg: "Article Not Found"})
-        }
+        const oldVotes = rows[0];
+        const newVotes = oldVotes.votes + inc_votes;
+        return db
+            .query("UPDATE articles SET votes = $1 WHERE article_id = $2 RETURNING *", [newVotes, article_id])
+            .then(({rows}) => rows[0])
     })
 }
