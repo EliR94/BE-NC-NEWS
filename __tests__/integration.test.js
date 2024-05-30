@@ -140,7 +140,15 @@ describe('GET /api/articles/:article_id/comments', () => {
         .get("/api/articles/999999999/comments")
         .expect(404)
         .then(({body}) => {
-            expect(body.msg).toBe("Article Not Found")
+            expect(body.msg).toBe("No article found for article_id: 999999999")
+        })
+    });
+    test('status 400: returns Bad Request when passed an invalid id (not a number)', () => {
+        return request(app)
+        .get("/api/articles/notAnId/comments")
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe("Bad Request")
         })
     });
 });
@@ -186,6 +194,102 @@ describe('POST /api/articles/:article_id/comments', () => {
         .expect(404)
         .then(({body}) => {
             expect(body.msg).toBe("Username Not Found")
+        })
+    });
+    test('status 404: returns no article found for article_id when passed an article_id which does not exist', () => {
+        const comment = {
+            username: "lurker",
+            body: "new comment"
+        }
+        return request(app)
+        .post("/api/articles/999999999/comments")
+        .send(comment)
+        .expect(404)
+        .then(({body}) => {
+            expect(body.msg).toBe("No article found for article_id: 999999999")
+        })
+    });
+    test('status 400: returns Bad Request when passed an invalid id (not a number)', () => {
+        const comment = {
+            username: "lurker",
+            body: "new comment"
+        }
+        return request(app)
+        .post("/api/articles/notAnId/comments")
+        .send(comment)
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe("Bad Request")
+        })
+    });
+});
+describe('PATCH /api/articles/:article_id', () => {
+    test('status 200: should update an article (given article_id) votes property modified by the inc_votes value provided within the request body, and return the updated article', () => {
+        const newVote = {
+            inc_votes: -20
+        }
+        return request(app)
+        .patch("/api/articles/1")
+        .send(newVote)
+        .expect(200)
+        .then(({body}) => {
+            expect(body.article).toMatchObject({
+                article_id: 1,
+                title: "Living in the shadow of a great man",
+                topic: "mitch",
+                author: "butter_bridge",
+                body: "I find this existence challenging",
+                created_at: "2020-07-09T20:11:00.000Z",
+                votes: 80,
+                article_img_url:
+                "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+            })
+        })
+    });
+    test('status 400: should return Bad Request when given malformed body {}', () => {
+        const newVote = {}
+        return request(app)
+        .patch("/api/articles/1")
+        .send(newVote)
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe("Bad Request")
+        })  
+    });
+    test('status 400: should return Bad Request when given body with incorrect data type', () => {
+        const newVote = {
+            inc_votes: "this is not a number"
+        }
+        return request(app)
+        .patch("/api/articles/1")
+        .send(newVote)
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe("Bad Request")
+        })  
+    });
+    test('status 404: returns no article found for article_id when passed an article_id which does not exist', () => {
+        const newVote = {
+            inc_votes: -20
+        }
+        return request(app)
+        .patch("/api/articles/999999999")
+        .send(newVote)
+        .expect(404)
+        .then(({body}) => {
+            expect(body.msg).toBe("No article found for article_id: 999999999")
+        })
+    });
+    test('status 400: returns Bad Request when passed an invalid id (not a number)', () => {
+        const newVote = {
+            inc_votes: -20
+        }
+        return request(app)
+        .patch("/api/articles/notAnId")
+        .send(newVote)
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe("Bad Request")
         })
     });
 });
