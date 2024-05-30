@@ -4,19 +4,10 @@ const { countComments } = require("./comments.models.js")
 
 exports.fetchArticles = () => {
     return db
-        .query("SELECT * FROM articles ORDER BY created_at DESC")
+        .query("SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.comment_id)::INT AS comment_count FROM articles LEFT JOIN comments ON comments.article_id = articles.article_id GROUP BY articles.article_id ORDER BY created_at DESC")
         .then(({rows}) => {
-            const articles = rows.map((article) => {
-                const updatedArticle = removeBodyProperty(article)
-                let commentCount = 0
-                countComments(article.article_id).then((count) => {
-                    commentCount += count
-                })
-                updatedArticle.comment_count = commentCount
-                return updatedArticle
-            })
-            return articles
-        })
+            return rows
+        })      
 }
 
 exports.fetchArticleById = (article_id) => {
@@ -32,4 +23,14 @@ exports.fetchArticleById = (article_id) => {
             }
             return article;
         })
+}
+
+exports.checkArticleExists = (article_id) => {
+    return db
+    .query("SELECT * FROM articles WHERE article_id = $1", [article_id])
+    .then(({rows}) => {
+        if(!rows.length){
+            return Promise.reject({status: 404, msg: "Article Not Found"})
+        }
+    })
 }

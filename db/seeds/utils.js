@@ -20,9 +20,3 @@ exports.formatComments = (comments, idLookup) => {
     };
   });
 };
-
-exports.removeBodyProperty = (articleObj) => {
-  const article = {...articleObj};
-  delete article.body;
-  return article
-}
