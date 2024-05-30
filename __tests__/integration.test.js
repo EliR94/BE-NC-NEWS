@@ -121,7 +121,7 @@ describe('GET /api/articles/:article_id/comments', () => {
                     created_at: expect.any(String),
                     author: expect.any(String),
                     body: expect.any(String),
-                    article_id: expect.any(Number)
+                    article_id: 9
                 })
             })
         })
@@ -141,6 +141,51 @@ describe('GET /api/articles/:article_id/comments', () => {
         .expect(404)
         .then(({body}) => {
             expect(body.msg).toBe("Article Not Found")
+        })
+    });
+});
+describe('POST /api/articles/:article_id/comments', () => {
+    test('status 200: should add a comment for an article when provided an object with a username and body, then return the posted comment', () => {
+        const comment = {
+            username: "lurker",
+            body: "new comment"
+        }
+        return request(app)
+        .post("/api/articles/9/comments")
+        .send(comment)
+        .expect(201)
+        .then(({body}) => {
+            expect(body.comment).toMatchObject({
+                comment_id: expect.any(Number),
+                votes: 0,
+                created_at: expect.any(String),
+                article_id: 9,
+                author: "lurker",
+                body: "new comment"
+            })
+        })
+    });
+    test('status 400: Bad Request when given malformed body {}', () => {
+        const comment = {}
+        return request(app)
+        .post("/api/articles/9/comments")
+        .send(comment)
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe("Bad Request")
+        })
+    });
+    test('status 404: Username Not Found when given username that does not exist on the users table', () => {
+        const comment = {
+            username: "Eli",
+            body: "new comment"
+        }
+        return request(app)
+        .post("/api/articles/9/comments")
+        .send(comment)
+        .expect(404)
+        .then(({body}) => {
+            expect(body.msg).toBe("Username Not Found")
         })
     });
 });
