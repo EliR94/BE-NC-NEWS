@@ -173,6 +173,28 @@ describe('POST /api/articles/:article_id/comments', () => {
             })
         })
     });
+    test('status 200: should update an article (given article_id) votes property modified by the inc_votes value provided within the request body, and return the updated article, even if provided with more properties in the request body', () => {
+        const comment = {
+            username: "lurker",
+            body: "new comment",
+            extra_property: "something",
+            another_extra: "something else"
+        }
+        return request(app)
+        .post("/api/articles/9/comments")
+        .send(comment)
+        .expect(201)
+        .then(({body}) => {
+            expect(body.comment).toMatchObject({
+                comment_id: expect.any(Number),
+                votes: 0,
+                created_at: expect.any(String),
+                article_id: 9,
+                author: "lurker",
+                body: "new comment"
+            })
+        })
+    });
     test('status 400: Bad Request when given malformed body {}', () => {
         const comment = {}
         return request(app)
@@ -246,6 +268,30 @@ describe('PATCH /api/articles/:article_id', () => {
             })
         })
     });
+    test('status 200: should update an article (given article_id) votes property modified by the inc_votes value provided within the request body, and return the updated article, even if provided with more properties in the request body', () => {
+        const newVote = {
+            inc_votes: 1,
+            property: "something",
+            another_property: "something else"
+        }
+        return request(app)
+        .patch("/api/articles/1")
+        .send(newVote)
+        .expect(200)
+        .then(({body}) => {
+            expect(body.article).toMatchObject({
+                article_id: 1,
+                title: "Living in the shadow of a great man",
+                topic: "mitch",
+                author: "butter_bridge",
+                body: "I find this existence challenging",
+                created_at: "2020-07-09T20:11:00.000Z",
+                votes: 101,
+                article_img_url:
+                "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+            })
+        })
+    });
     test('status 400: should return Bad Request when given malformed body {}', () => {
         const newVote = {}
         return request(app)
@@ -287,6 +333,29 @@ describe('PATCH /api/articles/:article_id', () => {
         return request(app)
         .patch("/api/articles/notAnId")
         .send(newVote)
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe("Bad Request")
+        })
+    });
+});
+describe('DELETE /api/comments/:comment_id', () => {
+    test('status 204: should delete the comment and return no content', () => {
+        return request(app)
+        .delete('/api/comments/1')
+        .expect(204)
+    });
+    test('status 404: should return no comment found for comment_id when passed a comment_id which does not exist', () => {
+        return request(app)
+        .delete('/api/comments/999999999')
+        .expect(404)
+        .then(({body}) => {
+            expect(body.msg).toBe("No comment found for comment id: 999999999")
+        })
+    });
+    test('status 400: returns Bad Request when passed an invalid id (not a number)', () => {
+        return request(app)
+        .delete('/api/comments/notAnId')
         .expect(400)
         .then(({body}) => {
             expect(body.msg).toBe("Bad Request")
