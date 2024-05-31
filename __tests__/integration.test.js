@@ -104,6 +104,46 @@ describe('GET /api/articles', () => {
             }
         })
     });
+    test('status 200: returns an array of article objects, filtered by query topic, each of which with the following properties: author, title, article_id, topic, created_at, votes, article_img_url, comment_count', () => {
+        return request(app)
+        .get("/api/articles?topic=cats")
+        .expect(200)
+        .then(({body}) => {
+            const articles = body.articles
+            expect(articles).toHaveLength(1)
+            expect(articles).toBeSorted({ descending: true })
+            for(const property in articles){
+                expect(articles[property]).not.toContainKey("body")
+                expect(articles[property]).toMatchObject({
+                    author: expect.any(String),
+                    title: expect.any(String),
+                    article_id: expect.any(Number),
+                    topic: "cats",
+                    created_at: expect.any(String),
+                    votes: expect.any(Number),
+                    article_img_url: expect.any(String),
+                    comment_count: expect.any(Number)
+                })
+            }
+        })
+    });
+    test('status 200: returns an empty array if given a topic that has no articles', () => {
+        return request(app)
+        .get("/api/articles?topic=paper")
+        .expect(200)
+        .then(({body}) => {
+            const articles = body.articles
+            expect(articles).toHaveLength(0)
+        })
+    });
+    test('status 404: returns topic not found when querying a topic that doesnt exist', () => {
+        return request(app)
+        .get("/api/articles?topic=ducks")
+        .expect(404)
+        .then(({body}) => {
+            expect(body.msg).toBe("Topic: ducks not found")
+    });
+});
 });
 describe('GET /api/articles/:article_id/comments', () => {
     test('status 200: should return array of comments for the given article_id, each comment with the following properties: comment_id, votes, created_at, author, body, article_id, ordered by date descending', () => {
@@ -246,7 +286,7 @@ describe('POST /api/articles/:article_id/comments', () => {
     });
 });
 describe('PATCH /api/articles/:article_id', () => {
-    test('status 200: should update an article (given article_id) votes property modified by the inc_votes value provided within the request body, and return the updated article', () => {
+    test('status 200: should update an article (given article_id) votes property modified by the inc_votes value (when it is negative) provided within the request body, and return the updated article', () => {
         const newVote = {
             inc_votes: -20
         }
@@ -263,6 +303,28 @@ describe('PATCH /api/articles/:article_id', () => {
                 body: "I find this existence challenging",
                 created_at: "2020-07-09T20:11:00.000Z",
                 votes: 80,
+                article_img_url:
+                "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+            })
+        })
+    });
+    test('status 200: should update an article (given article_id) votes property modified by the inc_votes value (when it is positive) provided within the request body, and return the updated article', () => {
+        const newVote = {
+            inc_votes: 1,
+        }
+        return request(app)
+        .patch("/api/articles/1")
+        .send(newVote)
+        .expect(200)
+        .then(({body}) => {
+            expect(body.article).toMatchObject({
+                article_id: 1,
+                title: "Living in the shadow of a great man",
+                topic: "mitch",
+                author: "butter_bridge",
+                body: "I find this existence challenging",
+                created_at: "2020-07-09T20:11:00.000Z",
+                votes: 101,
                 article_img_url:
                 "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
             })
