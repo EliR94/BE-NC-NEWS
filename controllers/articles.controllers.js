@@ -1,12 +1,15 @@
 const { fetchArticleById, fetchArticles, updateArticleVotesById } = require("../models/articles.models")
 const { fetchCommentsByArticleId, insertCommentByArticleId } = require("../models/comments.models")
+const { fetchTopics } = require("../models/topics.models")
 
 exports.getArticles = (req, res, next) => {
-    fetchArticles()
-        .then((articles) => {
-            res.status(200).send({ articles })
-        })
-        .catch((err) => next(err))
+    const { topic } = req.query
+    Promise.all([fetchTopics(topic), fetchArticles(topic)])
+    .then((promiseResult) => {
+        const articles = promiseResult[1]
+        res.status(200).send({ articles })
+    })
+    .catch((err) => next(err))
 }
 
 exports.getArticleById = (req, res, next) => {
