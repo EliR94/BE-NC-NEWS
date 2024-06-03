@@ -1,8 +1,8 @@
 # Northcoders News API Instructions
 
 ## To use this API: 
-* https://nc-news-ms3a.onrender.com
-* Endpoint: /api will return a JSON with all of the available API endpoints, descriptions and example responses
+* https://nc-news-ms3a.onrender.com/api
+    * Endpoint: /api will return a JSON with all of the available API endpoints, descriptions and example responses
 * Please be patient for API requests as hosting instance will spin down with inactivity, which can delay requests by 50 seconds or more
 * Please do let me know if you find any areas of improvement I am very happy to receive feedback
 
