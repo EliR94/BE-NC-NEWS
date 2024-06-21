@@ -2,7 +2,7 @@ const db = require("../db/connection.js")
 const { fetchTopics } = require("./topics.models.js")
 
 exports.fetchArticles = (topic, sort_by = 'created_at', order = 'DESC') => {
-        if(!['author', 'title', 'article_id', 'topic','created_at','votes','article_img_url',"comment_count"].includes(sort_by)){
+        if(!['author', 'title', 'article_id', 'topic','created_at','votes','article_img_url','comment_count'].includes(sort_by)){
             return Promise.reject()
         }
         if(!['DESC', 'ASC', 'asc', 'desc'].includes(order)){
