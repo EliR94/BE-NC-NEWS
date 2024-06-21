@@ -3,8 +3,8 @@ const { fetchCommentsByArticleId, insertCommentByArticleId } = require("../model
 const { fetchTopics } = require("../models/topics.models")
 
 exports.getArticles = (req, res, next) => {
-    const { topic } = req.query
-    Promise.all([fetchTopics(topic), fetchArticles(topic)])
+    const { topic, sort_by, order } = req.query
+    Promise.all([fetchTopics(topic), fetchArticles(topic, sort_by, order)])
     .then((promiseResult) => {
         const articles = promiseResult[1]
         res.status(200).send({ articles })

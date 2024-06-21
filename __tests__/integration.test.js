@@ -145,6 +145,53 @@ describe('GET /api/articles', () => {
             expect(body.msg).toBe("Topic: ducks not found")
     });
 });
+    test('status 200: returns an array of article objects, sorted by query "sort_by" (in desc order by default), each of which with the following properties: author, title, article_id, topic, created_at, votes, article_img_url, comment_count', () => {
+        return request(app)
+        .get("/api/articles?sort_by=comment_count")
+        .expect(200)
+        .then(({body}) => {
+            const articles = body.articles
+            expect(articles).toHaveLength(13)
+            expect(articles).toBeSortedBy('comment_count', { descending: true })
+            for(const property in articles){
+                expect(articles[property]).not.toContainKey("body")
+                expect(articles[property]).toMatchObject({
+                    author: expect.any(String),
+                    title: expect.any(String),
+                    article_id: expect.any(Number),
+                    topic: expect.any(String),
+                    created_at: expect.any(String),
+                    votes: expect.any(Number),
+                    article_img_url: expect.any(String),
+                    comment_count: expect.any(Number)
+                })
+            }
+        })
+    });
+    test('status 200: returns an array of article objects, sorted by query "sort_by" in order of query "order", each of which with the following properties: author, title, article_id, topic, created_at, votes, article_img_url, comment_count', () => {
+        return request(app)
+        .get("/api/articles?sort_by=votes&order=ASC")
+        .expect(200)
+        .then(({body}) => {
+            const articles = body.articles
+            expect(articles).toHaveLength(13)
+            expect(articles).toBeSortedBy('votes')
+            for(const property in articles){
+                expect(articles[property]).not.toContainKey("body")
+                expect(articles[property]).toMatchObject({
+                    author: expect.any(String),
+                    title: expect.any(String),
+                    article_id: expect.any(Number),
+                    topic: expect.any(String),
+                    created_at: expect.any(String),
+                    votes: expect.any(Number),
+                    article_img_url: expect.any(String),
+                    comment_count: expect.any(Number)
+                })
+            }
+        })
+    });
+    // add tests for errors: invalid sort_by ...
 });
 describe('GET /api/articles/:article_id/comments', () => {
     test('status 200: should return array of comments for the given article_id, each comment with the following properties: comment_id, votes, created_at, author, body, article_id, ordered by date descending', () => {
